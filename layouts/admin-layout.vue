@@ -7,6 +7,8 @@
         <slot />
       </main>
     </div>
+    <!-- Global toast notifications -->
+    <ToastContainer />
   </div>
 </template>
 

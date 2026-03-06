@@ -28,7 +28,9 @@ import {
   BeakerIcon,
   MegaphoneIcon,
   UserCircleIcon,
-   UserGroupIcon,
+  UserGroupIcon,
+  ClipboardDocumentCheckIcon,
+  SparklesIcon,
 } from '@heroicons/vue/24/outline'
 
 const navigation = [
@@ -36,7 +38,9 @@ const navigation = [
   { name: 'Appointments', path: '/admin/appointments', icon: CalendarIcon },
   { name: 'Facility Locator', path: '/admin/facilities', icon: MapPinIcon },
   { name: 'Vaccination Records', path: '/admin/patients', icon: UsersIcon },
-   { name: 'Children', path: '/admin/children', icon: UserGroupIcon },
+  { name: 'Children', path: '/admin/children', icon: UserGroupIcon },
+  { name: 'Immunization Tracker', path: '/admin/immunization', icon: ClipboardDocumentCheckIcon },
+  { name: 'AI Insights', path: '/admin/insights', icon: SparklesIcon },
   { name: 'Vaccines', path: '/admin/vaccines', icon: BeakerIcon },
   { name: 'Broadcasting', path: '/admin/broadcasting', icon: MegaphoneIcon },
   { name: 'Analytics', path: '/admin/analytics', icon: ChartBarIcon },

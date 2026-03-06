@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white flex">
     <!-- Sidebar -->
     <div class="w-64 bg-white shadow-lg border-r border-gray-200 fixed h-full z-10">
@@ -320,6 +320,19 @@
 
         <!-- Children Records Page -->
         <div v-if="currentPage === 'children'">
+
+          <!-- Add Child button row -->
+          <div class="flex justify-between items-center mb-6">
+            <p class="text-sm text-gray-500">{{ children.length }} child(ren) registered</p>
+            <button @click="showAddChildModal = true"
+              class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-md">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+              </svg>
+              Add Child
+            </button>
+          </div>
+
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div
               v-for="child in children"
@@ -376,13 +389,18 @@
                 </div>
               </div>
 
-              <div class="pt-4 border-t border-gray-200">
-                <p class="text-xs text-gray-600 mb-2">Caregiver: {{ child.relationshipToParent }}</p>
+              <div class="pt-4 border-t border-gray-200 flex gap-2">
                 <button
                   @click="viewChildAppointments(child.birthCertificateNumber)"
-                  class="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                  class="flex-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
                 >
                   View Appointments
+                </button>
+                <button
+                  @click="goToImmunizations(child)"
+                  class="flex-1 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors text-sm font-medium"
+                >
+                  ðŸ’‰ Immunizations
                 </button>
               </div>
             </div>
@@ -394,12 +412,344 @@
             </svg>
             <p class="mt-2 text-gray-900 font-medium">No children registered</p>
             <p class="text-sm text-gray-600 mt-1">Register your first child to get started</p>
+            <button @click="showAddChildModal = true"
+              class="mt-4 px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+              + Register First Child
+            </button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <!-- Immunizations Page â€” Premium Redesign                          -->
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <div v-if="currentPage === 'immunizations'" class="min-h-screen" style="background:#f0f4ff">
+
+      <!-- No Child Selected State -->
+      <div v-if="!activeChild" class="flex flex-col items-center justify-center py-24">
+        <div class="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-800 mb-1">No Child Selected</h3>
+        <p class="text-sm text-gray-500 mb-4 text-center max-w-sm">Select a child from Children Records and tap "Immunizations" to view their schedule</p>
+        <button @click="currentPage = 'children'" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+          Go to Children Records
+        </button>
+      </div>
+
+      <div v-else>
+
+        <!-- â”€â”€ HERO HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div class="relative overflow-hidden rounded-none" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0c4a6e 100%)">
+          <!-- Decorative blobs -->
+          <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <div class="absolute -top-16 -right-16 w-64 h-64 rounded-full" style="background: radial-gradient(circle, #38bdf8 0%, transparent 70%)"></div>
+            <div class="absolute -bottom-8 left-20 w-48 h-48 rounded-full" style="background: radial-gradient(circle, #6366f1 0%, transparent 70%)"></div>
+          </div>
+
+          <div class="relative z-10 px-6 pt-7 pb-6">
+            <!-- Child info row -->
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold text-white"
+                style="background: linear-gradient(135deg, #3b82f6, #6366f1)">
+                {{ activeChild.firstName.charAt(0) }}{{ activeChild.lastName.charAt(0) }}
+              </div>
+              <div>
+                <h2 class="text-lg font-bold text-white leading-tight">{{ activeChild.firstName }} {{ activeChild.lastName }}</h2>
+                <p class="text-blue-300 text-xs mt-0.5">Zimbabwe National Immunization Schedule &middot; CHW Job Aid</p>
+              </div>
+              <div class="ml-auto">
+                <button @click="fetchImmunizationSchedule"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-blue-200 border border-blue-700 hover:bg-blue-800 transition-colors">
+                  <svg class="w-3.5 h-3.5" :class="loadingImmunization ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- Stats + Circular Progress -->
+            <div v-if="immunizationSchedule" class="flex items-center gap-6">
+              <!-- Circular SVG progress ring -->
+              <div class="relative flex-shrink-0">
+                <svg width="88" height="88" viewBox="0 0 88 88">
+                  <!-- Track -->
+                  <circle cx="44" cy="44" r="36" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
+                  <!-- Progress -->
+                  <circle cx="44" cy="44" r="36" fill="none" stroke="#38bdf8" stroke-width="8"
+                    stroke-linecap="round"
+                    :stroke-dasharray="226.2"
+                    :stroke-dashoffset="226.2 - (226.2 * immunizationSchedule.doses.filter(d => d.status === 'ADMINISTERED').length / immunizationSchedule.doses.length)"
+                    transform="rotate(-90 44 44)"
+                    style="transition: stroke-dashoffset 1s ease"/>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span class="text-xl font-bold text-white leading-none">
+                    {{ Math.round(immunizationSchedule.doses.filter(d => d.status === 'ADMINISTERED').length / immunizationSchedule.doses.length * 100) }}%
+                  </span>
+                  <span class="text-blue-300 text-[9px] font-medium mt-0.5">COMPLETE</span>
+                </div>
+              </div>
+
+              <!-- Stat pills -->
+              <div class="flex flex-wrap gap-3 flex-1">
+                <div class="flex flex-col px-3 py-2 rounded-xl" style="background: rgba(255,255,255,0.08)">
+                  <span class="text-xl font-bold text-white">{{ immunizationSchedule.doses.filter(d => d.status === 'ADMINISTERED').length }}</span>
+                  <span class="text-xs text-blue-200 mt-0.5">Given</span>
+                </div>
+                <div class="flex flex-col px-3 py-2 rounded-xl" style="background: rgba(239,68,68,0.2)">
+                  <span class="text-xl font-bold text-red-300">{{ immunizationSchedule.doses.filter(d => d.status === 'OVERDUE').length }}</span>
+                  <span class="text-xs text-red-300 mt-0.5">Overdue</span>
+                </div>
+                <div class="flex flex-col px-3 py-2 rounded-xl" style="background: rgba(234,179,8,0.2)">
+                  <span class="text-xl font-bold text-yellow-200">{{ immunizationSchedule.doses.filter(d => d.status === 'DUE' || d.status === 'DUE_SOON').length }}</span>
+                  <span class="text-xs text-yellow-200 mt-0.5">Due Soon</span>
+                </div>
+                <div class="flex flex-col px-3 py-2 rounded-xl" style="background: rgba(255,255,255,0.05)">
+                  <span class="text-xl font-bold text-gray-300">{{ immunizationSchedule.doses.filter(d => d.status === 'NOT_YET_DUE').length }}</span>
+                  <span class="text-xs text-gray-400 mt-0.5">Pending</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Next due alert -->
+            <div v-if="nextDue" class="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl"
+              style="background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3)">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(251,191,36,0.25)">
+                <svg class="w-4 h-4 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-yellow-200 text-xs font-semibold">Next Vaccination Due</p>
+                <p class="text-white text-sm font-bold">{{ nextDue.vaccineName }}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-yellow-200 text-xs">{{ formatDate(nextDue.scheduledDate) }}</p>
+              </div>
+            </div>
+          </div>
+        </div><!-- end hero -->
+
+        <!-- â”€â”€ LOADING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div v-if="loadingImmunization" class="flex flex-col items-center justify-center py-20">
+          <div class="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin mb-4"></div>
+          <p class="text-gray-500 text-sm">Loading immunization scheduleâ€¦</p>
+        </div>
+
+        <!-- â”€â”€ VACCINE LIST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <div v-else-if="immunizationSchedule" class="px-4 py-5 space-y-3">
+
+          <!-- Overdue urgent alert -->
+          <div v-if="immunizationSchedule.doses.some(d => d.status === 'OVERDUE')"
+            class="flex items-start gap-3 px-4 py-3 rounded-2xl mb-2"
+            style="background: linear-gradient(135deg, #fef2f2, #fff1f2); border: 1px solid #fecaca">
+            <div class="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-red-800">
+                {{ immunizationSchedule.doses.filter(d => d.status === 'OVERDUE').length }} Overdue Dose(s) - Action Required
+              </p>
+              <p class="text-xs text-red-600 mt-0.5">Please visit your nearest health facility as soon as possible to catch up on missed vaccinations.</p>
+            </div>
+          </div>
+
+          <!-- Group label helper: we use vaccineKey to detect milestone groups -->
+          <!-- Each dose is rendered as a premium card -->
+          <div v-for="(dose, index) in immunizationSchedule.doses" :key="dose.vaccineKey">
+
+            <!-- Milestone age group header (shows when age group changes) -->
+            <div v-if="index === 0 || dose.scheduledAgeWeeks !== immunizationSchedule.doses[index - 1].scheduledAgeWeeks"
+              class="flex items-center gap-3 mt-4 mb-2">
+              <div class="h-px flex-1" style="background: linear-gradient(90deg, #c7d2fe, transparent)"></div>
+              <div class="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold"
+                style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ formatScheduledAge(dose.scheduledAgeWeeks) }}
+              </div>
+              <div class="h-px flex-1" style="background: linear-gradient(90deg, transparent, #c7d2fe)"></div>
+            </div>
+
+            <!-- Vaccine card -->
+            <div :class="[
+                'relative rounded-2xl overflow-hidden transition-all duration-200',
+                dose.status === 'ADMINISTERED' ? 'shadow-sm' : 'shadow hover:shadow-md hover:-translate-y-0.5'
+              ]"
+              style="background: white; border: 1px solid #e5e7eb">
+
+              <!-- Left accent bar -->
+              <div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
+                :style="{
+                  background:
+                    dose.status === 'ADMINISTERED' ? 'linear-gradient(180deg, #22c55e, #16a34a)' :
+                    dose.status === 'OVERDUE'       ? 'linear-gradient(180deg, #ef4444, #dc2626)' :
+                    dose.status === 'DUE'           ? 'linear-gradient(180deg, #f59e0b, #d97706)' :
+                    dose.status === 'DUE_SOON'      ? 'linear-gradient(180deg, #f97316, #ea580c)' :
+                                                      'linear-gradient(180deg, #d1d5db, #9ca3af)'
+                }">
+              </div>
+
+              <div class="pl-5 pr-4 py-4">
+                <div class="flex items-start gap-3">
+
+                  <!-- Status icon circle -->
+                  <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                    :style="{
+                      background:
+                        dose.status === 'ADMINISTERED' ? '#f0fdf4' :
+                        dose.status === 'OVERDUE'       ? '#fef2f2' :
+                        dose.status === 'DUE'           ? '#fffbeb' :
+                        dose.status === 'DUE_SOON'      ? '#fff7ed' : '#f9fafb'
+                    }">
+                    <!-- Administered: checkmark -->
+                    <svg v-if="dose.status === 'ADMINISTERED'" class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <!-- Overdue: exclamation -->
+                    <svg v-else-if="dose.status === 'OVERDUE'" class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <!-- Due: calendar -->
+                    <svg v-else-if="dose.status === 'DUE' || dose.status === 'DUE_SOON'" class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <!-- Pending: circle outline -->
+                    <svg v-else class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9" stroke-width="2"/>
+                    </svg>
+                  </div>
+
+                  <!-- Main content -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <p class="font-bold text-gray-900 text-sm leading-snug">{{ dose.vaccineName }}</p>
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                          <!-- Dosage chip -->
+                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
+                            <span class="font-bold text-gray-500">Dose:</span> {{ dose.dosage }}
+                          </span>
+                          <!-- Route chip -->
+                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700">
+                            <span class="font-bold">Route:</span> {{ dose.route }}
+                          </span>
+                          <!-- Site chip -->
+                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700" :title="dose.site">
+                            <span class="font-bold">Site:</span> {{ dose.site }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Status badge -->
+                      <div class="flex-shrink-0 text-right">
+                        <span :class="[
+                          'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap',
+                          dose.status === 'ADMINISTERED' ? 'bg-green-100 text-green-800' :
+                          dose.status === 'OVERDUE'       ? 'bg-red-100 text-red-800' :
+                          dose.status === 'DUE'           ? 'bg-amber-100 text-amber-800' :
+                          dose.status === 'DUE_SOON'      ? 'bg-orange-100 text-orange-800' :
+                                                            'bg-gray-100 text-gray-500'
+                        ]">
+                          {{
+                            dose.status === 'ADMINISTERED' ? 'Given' :
+                            dose.status === 'OVERDUE'       ? 'Overdue' :
+                            dose.status === 'DUE'           ? 'Due Now' :
+                            dose.status === 'DUE_SOON'      ? 'Due Soon' :
+                                                              'Upcoming'
+                          }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Bottom row: scheduled date + administered date + catch-up button -->
+                    <div class="flex items-center justify-between mt-2.5 pt-2.5" style="border-top: 1px dashed #f3f4f6">
+                      <div class="flex items-center gap-4">
+                        <div>
+                          <p class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Scheduled</p>
+                          <p class="text-xs font-semibold text-gray-700">{{ formatDate(dose.scheduledDate) }}</p>
+                        </div>
+                        <div v-if="dose.administeredDate">
+                          <p class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Date Given</p>
+                          <p class="text-xs font-semibold text-green-700">{{ formatDate(dose.administeredDate) }}</p>
+                        </div>
+                        <div v-if="dose.batchNumber && dose.batchNumber !== 'N/A'">
+                          <p class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Batch</p>
+                          <p class="text-xs font-mono text-gray-600">{{ dose.batchNumber }}</p>
+                        </div>
+                      </div>
+
+                      <!-- Catch-up button: only if older than required AND not yet administered -->
+                      <button
+                        v-if="dose.status !== 'ADMINISTERED' && isChildOlderThanRequired(dose)"
+                        @click="openUpdateRecordModal(dose)"
+                        class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all hover:scale-105 active:scale-95"
+                        style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 2px 8px rgba(245,158,11,0.4)"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Update Records
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom legend -->
+          <div class="mt-6 flex flex-wrap gap-3 px-1 pb-4">
+            <span v-for="l in [
+              {label: 'Administered', bg: '#f0fdf4', color: '#15803d', dot: '#22c55e'},
+              {label: 'Due Now',      bg: '#fffbeb', color: '#92400e', dot: '#f59e0b'},
+              {label: 'Due Soon',     bg: '#fff7ed', color: '#9a3412', dot: '#f97316'},
+              {label: 'Overdue',      bg: '#fef2f2', color: '#991b1b', dot: '#ef4444'},
+              {label: 'Upcoming',     bg: '#f9fafb', color: '#6b7280', dot: '#d1d5db'},
+            ]" :key="l.label"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+              :style="{background: l.bg, color: l.color}">
+              <span class="w-2 h-2 rounded-full inline-block" :style="{background: l.dot}"></span>
+              {{ l.label }}
+            </span>
+          </div>
+
+        </div><!-- end vaccine list -->
+
+        <!-- Error state -->
+        <div v-else class="flex flex-col items-center justify-center py-20">
+          <div class="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center mb-4">
+            <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <p class="text-gray-700 font-semibold mb-1">Could not load schedule</p>
+          <button @click="fetchImmunizationSchedule" class="text-blue-600 hover:text-blue-700 text-sm font-medium mt-2">Try again</button>
+        </div>
+
+      </div>
+    </div><!-- end immunizations page -->
+
+
+
+
+
+
+
+
+
+
     <!-- Booking Modal -->
+
+
     <div v-if="showBookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b border-gray-200 sticky top-0 bg-white">
@@ -472,18 +822,48 @@
             </div>
           </div>
 
-          <!-- Facility Selection -->
+          <!-- Facility Selection with AI Suggestions -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Facility ID *
             </label>
-            <input
-              v-model="bookingForm.facilityID"
-              type="text"
-              required
-              placeholder="Enter facility ID"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <div class="space-y-3">
+              <input
+                v-model="bookingForm.facilityID"
+                type="text"
+                required
+                placeholder="Enter facility ID or select a suggestion below"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              
+              <!-- Suggestions -->
+              <div v-if="suggestedFacilities.length > 0" class="space-y-2">
+                <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">AI Suggested Facilities In Your District</p>
+                <div class="flex flex-wrap gap-2">
+                  <button 
+                    v-for="fac in suggestedFacilities" 
+                    :key="fac.facilityID"
+                    type="button"
+                    @click="bookingForm.facilityID = fac.facilityID"
+                    :class="[
+                      'px-3 py-2 rounded-xl text-xs font-semibold border transition-all',
+                      bookingForm.facilityID === fac.facilityID ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300'
+                    ]"
+                  >
+                    <div class="flex flex-col items-start">
+                      <span>{{ fac.facilityName }}</span>
+                      <span class="text-[9px] opacity-70">{{ fac.facilityType }} · {{ fac.facilityDistrict }}</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+              <div v-else-if="loadingSuggestions" class="flex items-center gap-2 text-xs text-gray-400">
+                <svg class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Looking for facilities in child's district...
+              </div>
+            </div>
           </div>
           
           <!-- Reason -->
@@ -575,6 +955,205 @@
         </button>
       </div>
     </div>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <!-- Add Child Modal                                                 -->
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <div v-if="showAddChildModal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 sticky top-0 bg-white flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">Register a Child</h3>
+            <p class="text-sm text-gray-500 mt-0.5">Their immunization schedule will be auto-generated after registration</p>
+          </div>
+          <button @click="showAddChildModal = false" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <form @submit.prevent="submitAddChild" class="p-6 space-y-5">
+          <!-- Row 1: First Name / Last Name -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+              <input v-model="addChildForm.firstName" type="text" required placeholder="e.g. Tinotenda"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+              <input v-model="addChildForm.lastName" type="text" required placeholder="e.g. Moyo"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"/>
+            </div>
+          </div>
+
+          <!-- Row 2: Birth Certificate / Date of Birth -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Birth Certificate Number *</label>
+              <input v-model="addChildForm.birthCertificateNumber" type="text" required placeholder="e.g. 23-123456A72"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+              <input v-model="addChildForm.dateOfBirth" type="date" required
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"/>
+            </div>
+          </div>
+
+          <!-- Row 3: Gender / Place of Birth -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
+              <select v-model="addChildForm.gender" required
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <option value="">Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Place of Birth</label>
+              <input v-model="addChildForm.placeOfBirth" type="text" placeholder="e.g. Harare"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"/>
+            </div>
+          </div>
+
+          <!-- Row 4: Birth Weight / Birth Height -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Birth Weight (kg)</label>
+              <input v-model="addChildForm.birthWeight" type="text" placeholder="e.g. 3.2"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Birth Height (cm)</label>
+              <input v-model="addChildForm.birthHeight" type="text" placeholder="e.g. 50"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"/>
+            </div>
+          </div>
+
+          <!-- Physical Address -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Physical Address</label>
+            <input v-model="addChildForm.physicalAddress" type="text" placeholder="e.g. 42 Baines Ave, Harare"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"/>
+          </div>
+
+          <!-- Relationship to Parent -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Your Relationship to Child *</label>
+            <select v-model="addChildForm.relationshipToParent" required
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+              <option value="">Select relationship</option>
+              <option value="Mother">Mother</option>
+              <option value="Father">Father</option>
+              <option value="Guardian">Guardian</option>
+              <option value="Grandparent">Grandparent</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Error / Info banner -->
+          <div v-if="addChildError" class="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+            {{ addChildError }}
+          </div>
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
+            ðŸ’¡ After registration, the system will automatically generate the full Zimbabwe CHW immunization schedule for this child.
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            <button type="button" @click="showAddChildModal = false"
+              class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50">
+              Cancel
+            </button>
+            <button type="submit" :disabled="addingChild"
+              class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+              <svg v-if="addingChild" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              {{ addingChild ? 'Registering...' : 'Register Child' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <!-- Update Immunization Records Modal (Catch-Up)                    -->
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <div v-if="showUpdateRecordModal && updateDose" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div class="p-5 border-b border-gray-200 flex justify-between items-center">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">Update Immunization Record</h3>
+            <p class="text-sm text-gray-500 mt-0.5">Record a previously administered dose</p>
+          </div>
+          <button @click="showUpdateRecordModal = false" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="p-5 space-y-4">
+          <!-- Vaccine info -->
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div class="flex items-start gap-3">
+              <span class="text-2xl">ðŸ’‰</span>
+              <div>
+                <p class="font-bold text-gray-900">{{ updateDose.vaccineName }}</p>
+                <p class="text-xs text-gray-600 mt-0.5">Expected age: {{ formatScheduledAge(updateDose.scheduledAgeWeeks) }} Â· {{ updateDose.route }} Â· {{ updateDose.site }}</p>
+                <div class="mt-1">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                    âš  This child is older than the expected vaccination age for this dose
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Date administered -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date Administered *</label>
+            <input v-model="updateRecordForm.administeredDate" type="date" required
+              :max="today"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"/>
+          </div>
+
+          <!-- Batch number -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Batch Number (optional)</label>
+            <input v-model="updateRecordForm.batchNumber" type="text" placeholder="e.g. ZWB-2024-001"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"/>
+          </div>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
+            This will mark <strong>{{ updateDose.vaccineName }}</strong> as administered for <strong>{{ activeChild?.firstName }}</strong> on the selected date.
+          </div>
+
+          <div v-if="updateRecordError" class="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+            {{ updateRecordError }}
+          </div>
+
+          <div class="flex gap-3 pt-1">
+            <button @click="showUpdateRecordModal = false"
+              class="flex-1 px-5 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 text-sm">
+              Cancel
+            </button>
+            <button @click="submitUpdateRecord" :disabled="updatingRecord"
+              class="flex-1 px-5 py-2.5 bg-amber-500 text-white rounded-xl font-semibold hover:bg-amber-600 disabled:opacity-50 text-sm flex items-center justify-center gap-2">
+              <svg v-if="updatingRecord" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              {{ updatingRecord ? 'Saving...' : 'Save Record' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -587,7 +1166,8 @@ export default {
       navItems: [
         { id: 'dashboard', label: 'Dashboard', icon: 'HomeIcon' },
         { id: 'appointments', label: 'Appointments', icon: 'CalendarIcon' },
-        { id: 'children', label: 'Children Records', icon: 'UsersIcon' }
+        { id: 'children', label: 'Children Records', icon: 'UsersIcon' },
+        { id: 'immunizations', label: 'Immunizations', icon: 'ClipboardDocumentCheckIcon' }
       ],
       
       // User data
@@ -617,7 +1197,41 @@ export default {
       },
       
       // Booking success data
-      bookingSuccess: {}
+      bookingSuccess: {},
+      suggestedFacilities: [],
+      loadingSuggestions: false,
+
+      // Immunization data
+      immunizationSchedule: null,
+      loadingImmunization: false,
+
+      // Add Child modal
+      showAddChildModal: false,
+      addingChild: false,
+      addChildError: '',
+      addChildForm: {
+        firstName: '',
+        lastName: '',
+        birthCertificateNumber: '',
+        dateOfBirth: '',
+        gender: '',
+        placeOfBirth: '',
+        physicalAddress: '',
+        birthWeight: '',
+        birthHeight: '',
+        relationshipToParent: ''
+      },
+
+      // Update Record modal
+      showUpdateRecordModal: false,
+      updateDose: null,
+      updatingRecord: false,
+      updateRecordError: '',
+      updateRecordForm: {
+        administeredDate: '',
+        batchNumber: ''
+      },
+      today: new Date().toISOString().split('T')[0]
     }
   },
   
@@ -626,7 +1240,8 @@ export default {
       const titles = {
         dashboard: 'Dashboard',
         appointments: 'Appointments',
-        children: 'Children Records'
+        children: 'Children Records',
+        immunizations: 'Immunization Schedule'
       }
       return titles[this.currentPage] || 'Dashboard'
     },
@@ -635,7 +1250,8 @@ export default {
       const subtitles = {
         dashboard: 'Overview of your vaccination management',
         appointments: 'Manage your children\'s vaccination appointments',
-        children: 'View and manage your children\'s information'
+        children: 'View and manage your children\'s information',
+        immunizations: 'Zimbabwe national immunization checklist for your child'
       }
       return subtitles[this.currentPage] || ''
     },
@@ -665,6 +1281,21 @@ export default {
     
     recentAppointments() {
       return this.appointments.slice(0, 5)
+    },
+
+    nextDue() {
+      if (!this.immunizationSchedule) return null
+      return this.immunizationSchedule.doses.find(d =>
+        d.status === 'DUE' || d.status === 'DUE_SOON'
+      ) || null
+    }
+  },
+
+  watch: {
+    currentPage(page) {
+      if (page === 'immunizations') {
+        this.fetchImmunizationSchedule()
+      }
     }
   },
   
@@ -770,6 +1401,10 @@ export default {
     setActiveChild(child) {
       this.activeChild = child
       this.fetchAppointments()
+      // Also refresh immunization schedule if on that page
+      if (this.currentPage === 'immunizations') {
+        this.fetchImmunizationSchedule()
+      }
     },
     
     viewChildAppointments(birthCertNumber) {
@@ -797,6 +1432,155 @@ export default {
         day: 'numeric'
       })
     },
+
+    formatScheduledAge(weeks) {
+      if (weeks === 0) return 'At Birth'
+      if (weeks < 8) return `${weeks} weeks`
+      const months = Math.round(weeks / 4.33)
+      if (months < 24) return `${months} months`
+      const years = Math.round(weeks / 52.18)
+      return `${years} years`
+    },
+
+    /**
+     * Returns true if the child's current age in weeks is greater than the dose's
+     * scheduledAgeWeeks â€” meaning they are older than the expected vaccination age.
+     */
+    isChildOlderThanRequired(dose) {
+      if (!this.activeChild || !this.activeChild.dateOfBirth || !dose.scheduledAgeWeeks) return false
+      const dob = new Date(this.activeChild.dateOfBirth)
+      const ageWeeks = Math.floor((Date.now() - dob.getTime()) / (7 * 24 * 60 * 60 * 1000))
+      return ageWeeks > dose.scheduledAgeWeeks
+    },
+
+    goToImmunizations(child) {
+      this.setActiveChild(child)
+      this.currentPage = 'immunizations'
+    },
+
+    openUpdateRecordModal(dose) {
+      this.updateDose = dose
+      this.updateRecordForm.administeredDate = ''
+      this.updateRecordForm.batchNumber = ''
+      this.updateRecordError = ''
+      this.showUpdateRecordModal = true
+    },
+
+    async submitUpdateRecord() {
+      if (!this.updateRecordForm.administeredDate) {
+        this.updateRecordError = 'Please select the date the vaccine was administered.'
+        return
+      }
+      this.updatingRecord = true
+      this.updateRecordError = ''
+      try {
+        const bcn = this.activeChild.birthCertificateNumber
+        const res = await fetch(
+          `http://localhost:8080/api/immunization/administer/${bcn}/${this.updateDose.vaccineKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              batchNumber: this.updateRecordForm.batchNumber || 'N/A',
+              administeredDate: this.updateRecordForm.administeredDate
+            })
+          }
+        )
+        if (res.ok) {
+          this.showUpdateRecordModal = false
+          // Refresh the immunization schedule
+          await this.fetchImmunizationSchedule()
+        } else {
+          this.updateRecordError = 'Failed to update record. Please try again.'
+        }
+      } catch (e) {
+        this.updateRecordError = 'Network error â€” please check your connection.'
+      } finally {
+        this.updatingRecord = false
+      }
+    },
+
+    async submitAddChild() {
+      this.addingChild = true
+      this.addChildError = ''
+      try {
+        const payload = {
+          ...this.addChildForm,
+          parentEmail: this.parentEmail
+        }
+        const res = await fetch('http://localhost:8080/api/children/add-new-child', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (res.ok) {
+          this.showAddChildModal = false
+          // Reset form
+          this.addChildForm = {
+            firstName: '', lastName: '', birthCertificateNumber: '',
+            dateOfBirth: '', gender: '', placeOfBirth: '',
+            physicalAddress: '', birthWeight: '', birthHeight: '',
+            relationshipToParent: ''
+          }
+          // Reload children list
+          await this.fetchChildren()
+        } else {
+          const err = await res.text()
+          this.addChildError = err || 'Failed to register child. Please check the details and try again.'
+        }
+      } catch (e) {
+        this.addChildError = 'Network error â€” please check your connection and try again.'
+      } finally {
+        this.addingChild = false
+      }
+    },
+
+    async fetchSuggestedFacilities(birthCertificateNumber) {
+      if (!birthCertificateNumber) {
+        this.suggestedFacilities = []
+        return
+      }
+      
+      const child = this.children.find(c => c.birthCertificateNumber === birthCertificateNumber)
+      if (!child) return
+
+      this.loadingSuggestions = true
+      try {
+        // Fallback to birthplace or address extraction if no explicit district field exists on child
+        const district = child.placeOfBirth || (child.physicalAddress ? child.physicalAddress.split(',').pop() : 'Harare')
+        const res = await fetch(`http://localhost:8080/api/facilities/by-district/${district.trim()}`)
+        if (res.ok) {
+          this.suggestedFacilities = await res.json()
+        } else {
+          this.suggestedFacilities = []
+        }
+      } catch (e) {
+        console.error('Error fetching suggested facilities:', e)
+      } finally {
+        this.loadingSuggestions = false
+      }
+    },
+
+    async fetchImmunizationSchedule() {
+      if (!this.activeChild || !this.activeChild.birthCertificateNumber) {
+        this.immunizationSchedule = null
+        return
+      }
+      this.loadingImmunization = true
+      try {
+        const resp = await fetch(`http://localhost:8080/api/immunization/schedule/${this.activeChild.birthCertificateNumber}`)
+        if (resp.ok) {
+          this.immunizationSchedule = await resp.json()
+        } else {
+          this.immunizationSchedule = null
+        }
+      } catch (e) {
+        console.error('Error fetching immunization schedule:', e)
+        this.immunizationSchedule = null
+      } finally {
+        this.loadingImmunization = false
+      }
+    },
     
     logout() {
       window.location.href = '/'
@@ -809,8 +1593,11 @@ export default {
   },
   
   watch: {
-    activeChild() {
-      if (this.activeChild) {
+    'bookingForm.birthCertificateNumber'(val) {
+      if (val) this.fetchSuggestedFacilities(val)
+    },
+    activeChild(newVal) {
+      if (newVal) {
         this.fetchAppointments()
       }
     }
