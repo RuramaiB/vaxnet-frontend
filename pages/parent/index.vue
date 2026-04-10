@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white flex">
     <!-- Sidebar -->
     <div class="w-64 bg-white shadow-lg border-r border-gray-200 fixed h-full z-10">
@@ -52,7 +52,7 @@
     <!-- Main Content -->
     <div class="ml-64 flex-1">
       <!-- Header -->
-      <div class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-5">
+      <div v-if="currentPage !== 'immunizations'" class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-5">
         <div class="flex w-full justify-between items-center">
         <div class="px-8 py-4">
           <h2 class="text-2xl font-bold text-gray-900">{{ currentPageTitle }}</h2>
@@ -418,325 +418,174 @@
             </button>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-    <!-- Immunizations Page â€” Premium Redesign                          -->
-    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-    <div v-if="currentPage === 'immunizations'" class="min-h-screen" style="background:#f0f4ff">
-
-      <!-- No Child Selected State -->
-      <div v-if="!activeChild" class="flex flex-col items-center justify-center py-24">
-        <div class="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mb-4">
-          <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-          </svg>
-        </div>
-        <h3 class="text-lg font-bold text-gray-800 mb-1">No Child Selected</h3>
-        <p class="text-sm text-gray-500 mb-4 text-center max-w-sm">Select a child from Children Records and tap "Immunizations" to view their schedule</p>
-        <button @click="currentPage = 'children'" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">
-          Go to Children Records
-        </button>
-      </div>
-
-      <div v-else>
-
-        <!-- â”€â”€ HERO HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-        <div class="relative overflow-hidden rounded-none" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0c4a6e 100%)">
-          <!-- Decorative blobs -->
-          <div class="absolute inset-0 opacity-10 pointer-events-none">
-            <div class="absolute -top-16 -right-16 w-64 h-64 rounded-full" style="background: radial-gradient(circle, #38bdf8 0%, transparent 70%)"></div>
-            <div class="absolute -bottom-8 left-20 w-48 h-48 rounded-full" style="background: radial-gradient(circle, #6366f1 0%, transparent 70%)"></div>
-          </div>
-
-          <div class="relative z-10 px-6 pt-7 pb-6">
-            <!-- Child info row -->
-            <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold text-white"
-                style="background: linear-gradient(135deg, #3b82f6, #6366f1)">
-                {{ activeChild.firstName.charAt(0) }}{{ activeChild.lastName.charAt(0) }}
-              </div>
-              <div>
-                <h2 class="text-lg font-bold text-white leading-tight">{{ activeChild.firstName }} {{ activeChild.lastName }}</h2>
-                <p class="text-blue-300 text-xs mt-0.5">Zimbabwe National Immunization Schedule &middot; CHW Job Aid</p>
-              </div>
-              <div class="ml-auto">
-                <button @click="fetchImmunizationSchedule"
-                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-blue-200 border border-blue-700 hover:bg-blue-800 transition-colors">
-                  <svg class="w-3.5 h-3.5" :class="loadingImmunization ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                  </svg>
-                  Refresh
-                </button>
-              </div>
-            </div>
-
-            <!-- Stats + Circular Progress -->
-            <div v-if="immunizationSchedule" class="flex items-center gap-6">
-              <!-- Circular SVG progress ring -->
-              <div class="relative flex-shrink-0">
-                <svg width="88" height="88" viewBox="0 0 88 88">
-                  <!-- Track -->
-                  <circle cx="44" cy="44" r="36" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
-                  <!-- Progress -->
-                  <circle cx="44" cy="44" r="36" fill="none" stroke="#38bdf8" stroke-width="8"
-                    stroke-linecap="round"
-                    :stroke-dasharray="226.2"
-                    :stroke-dashoffset="226.2 - (226.2 * immunizationSchedule.doses.filter(d => d.status === 'ADMINISTERED').length / immunizationSchedule.doses.length)"
-                    transform="rotate(-90 44 44)"
-                    style="transition: stroke-dashoffset 1s ease"/>
-                </svg>
-                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                  <span class="text-xl font-bold text-white leading-none">
-                    {{ Math.round(immunizationSchedule.doses.filter(d => d.status === 'ADMINISTERED').length / immunizationSchedule.doses.length * 100) }}%
-                  </span>
-                  <span class="text-blue-300 text-[9px] font-medium mt-0.5">COMPLETE</span>
-                </div>
-              </div>
-
-              <!-- Stat pills -->
-              <div class="flex flex-wrap gap-3 flex-1">
-                <div class="flex flex-col px-3 py-2 rounded-xl" style="background: rgba(255,255,255,0.08)">
-                  <span class="text-xl font-bold text-white">{{ immunizationSchedule.doses.filter(d => d.status === 'ADMINISTERED').length }}</span>
-                  <span class="text-xs text-blue-200 mt-0.5">Given</span>
-                </div>
-                <div class="flex flex-col px-3 py-2 rounded-xl" style="background: rgba(239,68,68,0.2)">
-                  <span class="text-xl font-bold text-red-300">{{ immunizationSchedule.doses.filter(d => d.status === 'OVERDUE').length }}</span>
-                  <span class="text-xs text-red-300 mt-0.5">Overdue</span>
-                </div>
-                <div class="flex flex-col px-3 py-2 rounded-xl" style="background: rgba(234,179,8,0.2)">
-                  <span class="text-xl font-bold text-yellow-200">{{ immunizationSchedule.doses.filter(d => d.status === 'DUE' || d.status === 'DUE_SOON').length }}</span>
-                  <span class="text-xs text-yellow-200 mt-0.5">Due Soon</span>
-                </div>
-                <div class="flex flex-col px-3 py-2 rounded-xl" style="background: rgba(255,255,255,0.05)">
-                  <span class="text-xl font-bold text-gray-300">{{ immunizationSchedule.doses.filter(d => d.status === 'NOT_YET_DUE').length }}</span>
-                  <span class="text-xs text-gray-400 mt-0.5">Pending</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Next due alert -->
-            <div v-if="nextDue" class="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl"
-              style="background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3)">
-              <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(251,191,36,0.25)">
-                <svg class="w-4 h-4 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <p class="text-yellow-200 text-xs font-semibold">Next Vaccination Due</p>
-                <p class="text-white text-sm font-bold">{{ nextDue.vaccineName }}</p>
-              </div>
-              <div class="text-right">
-                <p class="text-yellow-200 text-xs">{{ formatDate(nextDue.scheduledDate) }}</p>
-              </div>
-            </div>
-          </div>
-        </div><!-- end hero -->
-
-        <!-- â”€â”€ LOADING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-        <div v-if="loadingImmunization" class="flex flex-col items-center justify-center py-20">
-          <div class="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin mb-4"></div>
-          <p class="text-gray-500 text-sm">Loading immunization scheduleâ€¦</p>
-        </div>
-
-        <!-- â”€â”€ VACCINE LIST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-        <div v-else-if="immunizationSchedule" class="px-4 py-5 space-y-3">
-
-          <!-- Overdue urgent alert -->
-          <div v-if="immunizationSchedule.doses.some(d => d.status === 'OVERDUE')"
-            class="flex items-start gap-3 px-4 py-3 rounded-2xl mb-2"
-            style="background: linear-gradient(135deg, #fef2f2, #fff1f2); border: 1px solid #fecaca">
-            <div class="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-red-800">
-                {{ immunizationSchedule.doses.filter(d => d.status === 'OVERDUE').length }} Overdue Dose(s) - Action Required
-              </p>
-              <p class="text-xs text-red-600 mt-0.5">Please visit your nearest health facility as soon as possible to catch up on missed vaccinations.</p>
-            </div>
-          </div>
-
-          <!-- Group label helper: we use vaccineKey to detect milestone groups -->
-          <!-- Each dose is rendered as a premium card -->
-          <div v-for="(dose, index) in immunizationSchedule.doses" :key="dose.vaccineKey">
-
-            <!-- Milestone age group header (shows when age group changes) -->
-            <div v-if="index === 0 || dose.scheduledAgeWeeks !== immunizationSchedule.doses[index - 1].scheduledAgeWeeks"
-              class="flex items-center gap-3 mt-4 mb-2">
-              <div class="h-px flex-1" style="background: linear-gradient(90deg, #c7d2fe, transparent)"></div>
-              <div class="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold"
-                style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                {{ formatScheduledAge(dose.scheduledAgeWeeks) }}
-              </div>
-              <div class="h-px flex-1" style="background: linear-gradient(90deg, transparent, #c7d2fe)"></div>
-            </div>
-
-            <!-- Vaccine card -->
-            <div :class="[
-                'relative rounded-2xl overflow-hidden transition-all duration-200',
-                dose.status === 'ADMINISTERED' ? 'shadow-sm' : 'shadow hover:shadow-md hover:-translate-y-0.5'
-              ]"
-              style="background: white; border: 1px solid #e5e7eb">
-
-              <!-- Left accent bar -->
-              <div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-                :style="{
-                  background:
-                    dose.status === 'ADMINISTERED' ? 'linear-gradient(180deg, #22c55e, #16a34a)' :
-                    dose.status === 'OVERDUE'       ? 'linear-gradient(180deg, #ef4444, #dc2626)' :
-                    dose.status === 'DUE'           ? 'linear-gradient(180deg, #f59e0b, #d97706)' :
-                    dose.status === 'DUE_SOON'      ? 'linear-gradient(180deg, #f97316, #ea580c)' :
-                                                      'linear-gradient(180deg, #d1d5db, #9ca3af)'
-                }">
-              </div>
-
-              <div class="pl-5 pr-4 py-4">
-                <div class="flex items-start gap-3">
-
-                  <!-- Status icon circle -->
-                  <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                    :style="{
-                      background:
-                        dose.status === 'ADMINISTERED' ? '#f0fdf4' :
-                        dose.status === 'OVERDUE'       ? '#fef2f2' :
-                        dose.status === 'DUE'           ? '#fffbeb' :
-                        dose.status === 'DUE_SOON'      ? '#fff7ed' : '#f9fafb'
-                    }">
-                    <!-- Administered: checkmark -->
-                    <svg v-if="dose.status === 'ADMINISTERED'" class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    <!-- Overdue: exclamation -->
-                    <svg v-else-if="dose.status === 'OVERDUE'" class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <!-- Due: calendar -->
-                    <svg v-else-if="dose.status === 'DUE' || dose.status === 'DUE_SOON'" class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    <!-- Pending: circle outline -->
-                    <svg v-else class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="9" stroke-width="2"/>
-                    </svg>
+        <!-- Immunizations Page — Zimbabwe Child Health Card Redesign -->
+        <div v-if="currentPage === 'immunizations'" class="min-h-screen bg-slate-50 p-6 lg:p-10">
+          
+          <!-- No Child Selected / Multi-Child Selector -->
+          <div v-if="!activeChild && children.length > 0" class="max-w-5xl mx-auto">
+            <div class="bg-white rounded-[2.5rem] shadow-xl p-10 border border-slate-100">
+              <h2 class="text-3xl font-black text-slate-800 mb-2">Digital Health Cards</h2>
+              <p class="text-slate-500 mb-10">Select a child to view their Zimbabwe National Immunization Record</p>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="c in children" :key="c.birthCertificateNumber"
+                     @click="setActiveChild(c)"
+                     class="group bg-slate-50 rounded-[2rem] p-6 cursor-pointer hover:bg-blue-600 transition-all duration-300 transform hover:-translate-y-2">
+                  <div class="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-2xl font-black text-blue-600 mb-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                    {{ c.firstName[0] }}{{ c.lastName[0] }}
                   </div>
+                  <h3 class="font-bold text-slate-800 group-hover:text-white transition-colors">{{ c.firstName }} {{ c.lastName }}</h3>
+                  <p class="text-xs text-slate-500 group-hover:text-blue-100 transition-colors uppercase tracking-widest mt-1">{{ c.birthCertificateNumber }}</p>
+                  <div class="mt-6 flex items-center text-blue-600 group-hover:text-white text-sm font-bold">
+                    Open Card <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                  <!-- Main content -->
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-start justify-between gap-2">
-                      <div>
-                        <p class="font-bold text-gray-900 text-sm leading-snug">{{ dose.vaccineName }}</p>
-                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                          <!-- Dosage chip -->
-                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
-                            <span class="font-bold text-gray-500">Dose:</span> {{ dose.dosage }}
-                          </span>
-                          <!-- Route chip -->
-                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700">
-                            <span class="font-bold">Route:</span> {{ dose.route }}
-                          </span>
-                          <!-- Site chip -->
-                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700" :title="dose.site">
-                            <span class="font-bold">Site:</span> {{ dose.site }}
-                          </span>
-                        </div>
-                      </div>
+          <div v-else-if="activeChild" class="max-w-6xl mx-auto">
+            <!-- Physical Card Container -->
+            <div class="bg-white shadow-2xl rounded-[3rem] overflow-hidden border border-slate-200 relative">
+              
+              <!-- Card Header / Branding -->
+              <div class="bg-[#fdfbf7] border-b-2 border-dashed border-slate-200 p-8 lg:p-12 relative overflow-hidden">
+                <!-- Decorative Seal -->
+                <div class="absolute top-10 right-10 opacity-5 pointer-events-none">
+                  <svg class="w-48 h-48" viewBox="0 0 100 100" fill="currentColor">
+                    <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <text x="50" y="50" text-anchor="middle" dy=".3em" font-size="8">MINISTRY OF HEALTH</text>
+                  </svg>
+                </div>
 
-                      <!-- Status badge -->
-                      <div class="flex-shrink-0 text-right">
-                        <span :class="[
-                          'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap',
-                          dose.status === 'ADMINISTERED' ? 'bg-green-100 text-green-800' :
-                          dose.status === 'OVERDUE'       ? 'bg-red-100 text-red-800' :
-                          dose.status === 'DUE'           ? 'bg-amber-100 text-amber-800' :
-                          dose.status === 'DUE_SOON'      ? 'bg-orange-100 text-orange-800' :
-                                                            'bg-gray-100 text-gray-500'
-                        ]">
-                          {{
-                            dose.status === 'ADMINISTERED' ? 'Given' :
-                            dose.status === 'OVERDUE'       ? 'Overdue' :
-                            dose.status === 'DUE'           ? 'Due Now' :
-                            dose.status === 'DUE_SOON'      ? 'Due Soon' :
-                                                              'Upcoming'
-                          }}
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+                  <div class="flex items-center gap-6">
+                    <div class="w-20 h-20 rounded-3xl bg-blue-600 flex items-center justify-center text-3xl font-black text-white shadow-lg shadow-blue-200">
+                      {{ activeChild.firstName[0] }}
+                    </div>
+                    <div>
+                      <h1 class="text-3xl font-black text-slate-900 tracking-tight">{{ activeChild.firstName }} {{ activeChild.lastName }}</h1>
+                      <div class="flex flex-wrap items-center gap-3 mt-2">
+                        <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider border border-slate-200">
+                          DOB: {{ formatDate(activeChild.dateOfBirth) }}
+                        </span>
+                        <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider border border-slate-200">
+                          ID: {{ activeChild.birthCertificateNumber }}
                         </span>
                       </div>
                     </div>
+                  </div>
 
-                    <!-- Bottom row: scheduled date + administered date + catch-up button -->
-                    <div class="flex items-center justify-between mt-2.5 pt-2.5" style="border-top: 1px dashed #f3f4f6">
-                      <div class="flex items-center gap-4">
-                        <div>
-                          <p class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Scheduled</p>
-                          <p class="text-xs font-semibold text-gray-700">{{ formatDate(dose.scheduledDate) }}</p>
-                        </div>
-                        <div v-if="dose.administeredDate">
-                          <p class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Date Given</p>
-                          <p class="text-xs font-semibold text-green-700">{{ formatDate(dose.administeredDate) }}</p>
-                        </div>
-                        <div v-if="dose.batchNumber && dose.batchNumber !== 'N/A'">
-                          <p class="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Batch</p>
-                          <p class="text-xs font-mono text-gray-600">{{ dose.batchNumber }}</p>
+                  <div class="flex flex-col items-end text-right">
+                    <div class="bg-blue-600 text-white px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] mb-2 shadow-md">
+                      Child Health Card
+                    </div>
+                    <p class="text-slate-400 text-[10px] font-bold leading-tight">ZIMBABWE NATIONAL<br/>IMMUNIZATION PROGRAMME</p>
+                  </div>
+                </div>
+
+                <!-- Dashboard Stats Bar -->
+                <div v-if="immunizationSchedule" class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                      <span class="text-sm font-bold text-slate-700">Live Active</span>
+                    </div>
+                  </div>
+                  <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Complete</p>
+                    <span class="text-lg font-black text-blue-600">{{ Math.round(immunizationSchedule.doses.filter(d => d.status === 'ADMINISTERED').length / immunizationSchedule.doses.length * 100) }}%</span>
+                  </div>
+                  <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm" :class="{'bg-red-50 border-red-100': immunizationSchedule.doses.some(d => d.status === 'MISSED' || d.status === 'OVERDUE')}">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Missed</p>
+                    <span class="text-lg font-black" :class="immunizationSchedule.doses.some(d => d.status === 'MISSED' || d.status === 'OVERDUE') ? 'text-red-600' : 'text-slate-300'">
+                      {{ immunizationSchedule.doses.filter(d => d.status === 'MISSED' || d.status === 'OVERDUE').length }}
+                    </span>
+                  </div>
+                  <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <button @click="fetchImmunizationSchedule" class="w-full h-full flex flex-col items-start justify-center text-blue-600 hover:text-blue-700 transition-colors">
+                      <p class="text-[10px] font-black uppercase tracking-widest mb-1">Sync</p>
+                      <span class="text-xs font-bold flex items-center">Refresh Data <span class="ml-1">↺</span></span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Content -->
+              <div class="p-8 lg:p-12 bg-white">
+                <div v-if="loadingImmunization" class="flex flex-col items-center py-24">
+                  <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                  <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Accessing Records...</p>
+                </div>
+
+                <div v-else-if="immunizationSchedule && immunizationSchedule.doses && immunizationSchedule.doses.length > 0" class="space-y-16">
+                  <div v-for="group in ['Birth', '6 Weeks', '10 Weeks', '14 Weeks', '9 Months', '18 Months', '5 Years', '10 Years']" 
+                       :key="group" class="relative">
+                    
+                    <div class="flex items-center gap-4 mb-6">
+                      <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-sm shadow-xl">
+                        {{ group[0] }}
+                      </div>
+                      <h3 class="text-xl font-black text-slate-800 tracking-tight">{{ group }}</h3>
+                      <div class="flex-1 h-[2px] bg-slate-50"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div v-for="dose in immunizationSchedule.doses.filter(d => formatScheduledAge(d.scheduledAgeWeeks) === group)" 
+                           :key="dose.vaccineKey"
+                           class="relative group">
+                        
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 transition-all duration-300 hover:bg-white hover:shadow-xl hover:border-blue-100 cursor-pointer"
+                             @click="openUpdateRecordModal(dose)">
+                          <div class="flex justify-between items-start mb-4">
+                            <div>
+                              <h4 class="font-bold text-slate-800 text-sm">{{ dose.vaccineName }}</h4>
+                              <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{{ dose.route }} · {{ dose.site }}</p>
+                            </div>
+                            
+                            <!-- Status Badge -->
+                            <div v-if="dose.status === 'ADMINISTERED'" class="flex items-center gap-1 text-emerald-600 font-black text-[9px] bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100 uppercase tracking-widest">
+                               GIVEN
+                            </div>
+                            <div v-else-if="dose.status === 'MISSED' || dose.status === 'OVERDUE'" class="flex items-center gap-1 text-red-600 font-black text-[9px] bg-red-50 px-2 py-1 rounded-full border border-red-100 animate-pulse uppercase tracking-widest">
+                               MISSED
+                            </div>
+                            <div v-else-if="dose.status === 'DUE' || dose.status === 'DUE_SOON'" class="flex items-center gap-1 text-amber-600 font-black text-[9px] bg-amber-50 px-2 py-1 rounded-full border border-amber-100 uppercase tracking-widest">
+                               DUE
+                            </div>
+                            <div v-else class="text-slate-300 font-black text-[9px] bg-white px-2 py-1 rounded-full border border-slate-100 uppercase tracking-widest">
+                               PENDING
+                            </div>
+                          </div>
+
+                          <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4 mt-2">
+                            <div>
+                              <p class="text-[8px] font-black text-slate-400 uppercase mb-1 tracking-widest">Scheduled</p>
+                              <p class="text-[10px] font-bold text-slate-600">{{ formatDate(dose.scheduledDate) }}</p>
+                            </div>
+                            <div v-if="dose.status === 'ADMINISTERED'">
+                              <p class="text-[8px] font-black text-emerald-400 uppercase mb-1 tracking-widest">Date Given</p>
+                              <p class="text-[10px] font-bold text-emerald-700">{{ formatDate(dose.administeredDate) }}</p>
+                            </div>
+                            <div v-else>
+                              <p class="text-[8px] font-black text-slate-300 uppercase mb-1 tracking-widest">Date Given</p>
+                              <p class="text-[10px] font-medium text-slate-300 italic">— — —</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-
-                      <!-- Catch-up button: only if older than required AND not yet administered -->
-                      <button
-                        v-if="dose.status !== 'ADMINISTERED' && isChildOlderThanRequired(dose)"
-                        @click="openUpdateRecordModal(dose)"
-                        class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all hover:scale-105 active:scale-95"
-                        style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 2px 8px rgba(245,158,11,0.4)"
-                      >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
-                        Update Records
-                      </button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          <!-- Bottom legend -->
-          <div class="mt-6 flex flex-wrap gap-3 px-1 pb-4">
-            <span v-for="l in [
-              {label: 'Administered', bg: '#f0fdf4', color: '#15803d', dot: '#22c55e'},
-              {label: 'Due Now',      bg: '#fffbeb', color: '#92400e', dot: '#f59e0b'},
-              {label: 'Due Soon',     bg: '#fff7ed', color: '#9a3412', dot: '#f97316'},
-              {label: 'Overdue',      bg: '#fef2f2', color: '#991b1b', dot: '#ef4444'},
-              {label: 'Upcoming',     bg: '#f9fafb', color: '#6b7280', dot: '#d1d5db'},
-            ]" :key="l.label"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-              :style="{background: l.bg, color: l.color}">
-              <span class="w-2 h-2 rounded-full inline-block" :style="{background: l.dot}"></span>
-              {{ l.label }}
-            </span>
-          </div>
-
-        </div><!-- end vaccine list -->
-
-        <!-- Error state -->
-        <div v-else class="flex flex-col items-center justify-center py-20">
-          <div class="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center mb-4">
-            <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <p class="text-gray-700 font-semibold mb-1">Could not load schedule</p>
-          <button @click="fetchImmunizationSchedule" class="text-blue-600 hover:text-blue-700 text-sm font-medium mt-2">Try again</button>
-        </div>
-
-      </div>
-    </div><!-- end immunizations page -->
+          </div><!-- end activeChild (448) -->
+        </div><!-- end Page Container (423) -->
+      </div><!-- end Page Content (67) -->
+    </div><!-- end Main Content (53) -->
 
 
 
@@ -822,19 +671,22 @@
             </div>
           </div>
 
-          <!-- Facility Selection with AI Suggestions -->
+          <!-- Facility Selection -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Facility ID *
+              Select Health Facility *
             </label>
             <div class="space-y-3">
-              <input
+              <select
                 v-model="bookingForm.facilityID"
-                type="text"
                 required
-                placeholder="Enter facility ID or select a suggestion below"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              >
+                <option value="">Choose a clinic or hospital</option>
+                <option v-for="fac in facilities" :key="fac.facilityID" :value="fac.facilityID">
+                  {{ fac.facilityName }} ({{ fac.facilityDistrict }})
+                </option>
+              </select>
               
               <!-- Suggestions -->
               <div v-if="suggestedFacilities.length > 0" class="space-y-2">
@@ -1153,8 +1005,6 @@
         </div>
       </div>
     </div>
-
-  </div>
 </template>
 
 <script>
@@ -1180,6 +1030,7 @@ export default {
       
       // Appointments data
       appointments: [],
+      facilities: [],
       appointmentFilter: 'all',
       
       // Modals
@@ -1203,6 +1054,7 @@ export default {
 
       // Immunization data
       immunizationSchedule: null,
+      parentSchedules: [],
       loadingImmunization: false,
 
       // Add Child modal
@@ -1327,6 +1179,17 @@ export default {
         this.activeChild = null
       }
     },
+
+    async fetchFacilities() {
+      try {
+        const response = await fetch('http://localhost:8080/api/facilities/get-all-facilities')
+        if (response.ok) {
+          this.facilities = await response.json()
+        }
+      } catch (error) {
+        console.error('Error fetching facilities:', error)
+      }
+    },
     
     async fetchAppointments() {
       if (!this.activeChild || !this.activeChild.birthCertificateNumber) {
@@ -1434,12 +1297,12 @@ export default {
     },
 
     formatScheduledAge(weeks) {
-      if (weeks === 0) return 'At Birth'
-      if (weeks < 8) return `${weeks} weeks`
+      if (weeks === 0) return 'Birth'
+      if (weeks < 20) return `${weeks} Weeks`
       const months = Math.round(weeks / 4.33)
-      if (months < 24) return `${months} months`
+      if (months < 24) return `${months} Months`
       const years = Math.round(weeks / 52.18)
-      return `${years} years`
+      return `${years} Years`
     },
 
     /**
@@ -1563,7 +1426,7 @@ export default {
 
     async fetchImmunizationSchedule() {
       if (!this.activeChild || !this.activeChild.birthCertificateNumber) {
-        this.immunizationSchedule = null
+        this.fetchParentSchedules()
         return
       }
       this.loadingImmunization = true
@@ -1581,6 +1444,18 @@ export default {
         this.loadingImmunization = false
       }
     },
+
+    async fetchParentSchedules() {
+      if (!this.parentEmail) return
+      try {
+        const resp = await fetch(`http://localhost:8080/api/immunization/parent/schedules/${this.parentEmail}`)
+        if (resp.ok) {
+          this.parentSchedules = await resp.json()
+        }
+      } catch (e) {
+        console.error('Error fetching parent schedules:', e)
+      }
+    },
     
     logout() {
       window.location.href = '/'
@@ -1589,7 +1464,7 @@ export default {
   
   mounted() {
     this.fetchChildren()
-  
+    this.fetchFacilities()
   },
   
   watch: {

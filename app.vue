@@ -8,21 +8,8 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { useNotification } from '~/composables/useNotification'
-
-const { connect, requestPermission } = useNotification()
 
 onMounted(() => {
-  // Check for email every second if not already connected
-  // This is a simple way to pick up the email once the user logs in
-  const checkEmailInterval = setInterval(() => {
-    const email = localStorage.getItem('email')
-    if (email) {
-      connect(email)
-      requestPermission() // Ask for browser notifications
-      clearInterval(checkEmailInterval)
-    }
-  }, 1000)
 })
 </script>
 

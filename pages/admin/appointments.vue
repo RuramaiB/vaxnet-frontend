@@ -793,10 +793,11 @@ const upcomingAppointments = computed(() => {
 })
 
 const missedAppointments = computed(() => {
-  const today = new Date()
+  const today = new Date().toISOString().split('T')[0]
   return appointments.value.filter(a => {
-    const appointmentDate = new Date(a.dateOfAppointment)
-    return appointmentDate < today && a.appointmentStatus === 'MISSED'
+    const isMissedStatus = a.appointmentStatus === 'MISSED'
+    const isOverdue = a.appointmentStatus === 'SCHEDULED' && a.dateOfAppointment < today
+    return isMissedStatus || isOverdue
   }).length
 })
 

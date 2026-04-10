@@ -590,7 +590,10 @@ const stats = computed(() => {
            a.appointmentStatus === 'SCHEDULED'
   }).length
   
-  const missedAppointments = appointments.value.filter(a => a.appointmentStatus === 'MISSED').length
+  const missedAppointments = appointments.value.filter(a => 
+    a.appointmentStatus === 'MISSED' || 
+    (a.appointmentStatus === 'SCHEDULED' && a.dateOfAppointment < today)
+  ).length
   
   // Calculate coverage rate
   const vaccinatedChildren = new Set(

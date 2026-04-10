@@ -381,7 +381,11 @@ const completionRate = computed(() => {
 })
 
 const missedRate = computed(() => {
-  const missed = appointments.value.filter(a => a.appointmentStatus === 'MISSED').length
+  const today = new Date().toISOString().split('T')[0]
+  const missed = appointments.value.filter(a => 
+    a.appointmentStatus === 'MISSED' || 
+    (a.appointmentStatus === 'SCHEDULED' && a.dateOfAppointment < today)
+  ).length
   const total = appointments.value.filter(a => 
     ['SCHEDULED', 'COMPLETED', 'MISSED'].includes(a.appointmentStatus)
   ).length

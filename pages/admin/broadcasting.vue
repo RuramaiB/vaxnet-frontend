@@ -1,441 +1,161 @@
 <template>
   <NuxtLayout name="admin-layout">
-    <div class="mb-6">
+    <div class="mb-8 overflow-hidden">
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">SMS Broadcasting</h1>
-          <p class="text-gray-600 mt-1">Send vaccination reminders and updates to parents</p>
+          <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Direct SMS Broadcast</h1>
+          <p class="text-gray-500 mt-1">Select recipients and send immunization reminders instantly.</p>
         </div>
-        <div class="flex items-center space-x-4">
-          <div class="text-sm text-gray-600">
-            <span class="font-semibold">{{ selectedRecipients.length }}</span> recipients selected
+        <div class="flex items-center gap-4">
+          <div class="px-4 py-2 bg-blue-50 border border-blue-100 rounded-xl">
+            <span class="text-blue-700 font-bold text-lg">{{ selectedRecipients.length }}</span>
+            <span class="text-blue-600/70 text-sm font-medium ml-1">selected</span>
           </div>
-          <button
-            @click="loadSampleData"
-            class="px-4 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-          >
-            Load Sample Data
-          </button>
         </div>
       </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <UiStatCard
-        title="Total Recipients"
-        :value="totalRecipients"
-        subtitle="Parents registered"
-        :icon="UserGroupIcon"
-        icon-color="text-blue-600"
-        icon-bg-color="bg-blue-100"
-      />
-      <UiStatCard
-        title="Messages Sent"
-        :value="messageHistory.length"
-        subtitle="This month"
-        :icon="ChatBubbleLeftRightIcon"
-        icon-color="text-green-600"
-        icon-bg-color="bg-green-100"
-      />
-      <UiStatCard
-        title="Success Rate"
-        value="98.2%"
-        subtitle="Delivery rate"
-        :icon="CheckCircleIcon"
-        icon-color="text-green-600"
-        icon-bg-color="bg-green-100"
-      />
-      <UiStatCard
-        title="Cost Estimate"
-        :value="`$${costEstimate}`"
-        subtitle="For this message"
-        :icon="CurrencyDollarIcon"
-        icon-color="text-yellow-600"
-        icon-bg-color="bg-yellow-100"
-      />
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Left Column: Filters -->
-      <div class="lg:col-span-1 space-y-6">
-        <!-- Location Filters (Targets Parents Only) -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">Filter by Location</h3>
-          <p class="text-xs text-gray-500 mb-2">Extracting categories from all registered parents.</p>
-          
-          <!-- Province Selection -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
-            <select
-              v-model="selectedProvince"
-              @change="handleFilterChange"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="">All Provinces</option>
-              <option v-for="p in availableCategories.provinces" :key="p" :value="p">{{ p }}</option>
-            </select>
-          </div>
-
-          <!-- District Selection -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">District</label>
-            <select
-              v-model="selectedDistrict"
-              @change="handleFilterChange"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="">All Districts</option>
-              <option v-for="d in availableCategories.districts" :key="d" :value="d">{{ d }}</option>
-            </select>
-          </div>
-
-          <!-- Town Selection -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Town</label>
-            <select
-              v-model="selectedTown"
-              @change="handleFilterChange"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="">All Towns</option>
-              <option v-for="t in availableCategories.towns" :key="t" :value="t">{{ t }}</option>
-            </select>
-          </div>
-
-          <!-- City Selection -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
-            <select
-              v-model="selectedCity"
-              @change="handleFilterChange"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="">All Cities</option>
-              <option v-for="c in availableCategories.cities" :key="c" :value="c">{{ c }}</option>
-            </select>
-          </div>
-
-          <div class="pt-2 border-t border-gray-100">
-            <button
-              @click="clearAllRecipients"
-              class="text-sm text-gray-600 hover:text-gray-500 font-medium"
-            >
-              Clear Filters
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Left: Simple Parent Selection -->
+      <div class="lg:col-span-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-[700px]">
+          <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <h3 class="text-lg font-bold text-gray-900">Parent Directory</h3>
+            <button @click="toggleSelectAll" class="text-sm font-semibold text-blue-600 hover:text-blue-700">
+              {{ allInFilteredSelected ? 'Deselect All' : 'Select All' }}
             </button>
           </div>
-        </div>
-      </div>
-
-      <!-- Middle Column: Parent Selection List -->
-      <div class="lg:col-span-1 space-y-6">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col h-[calc(100vh-280px)]">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Parents List</h3>
-            <div class="space-x-2">
-              <button
-                @click="selectAllFiltered"
-                class="text-xs font-medium text-primary-600 hover:text-primary-700"
-              >
-                Select All
-              </button>
-              <button
-                @click="deselectAllFiltered"
-                class="text-xs font-medium text-gray-500 hover:text-gray-600"
-              >
-                Deselect All
-              </button>
-            </div>
-          </div>
-
-          <!-- List controls -->
-          <div class="mb-4">
+          
+          <div class="p-4 border-b border-gray-100">
             <div class="relative">
+              <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 v-model="parentSearchQuery"
                 type="text"
-                placeholder="Find in list..."
-                class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="Search by name or phone..."
+                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-sm"
               />
-              <MagnifyingGlassIcon class="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
             </div>
           </div>
 
-          <div class="flex-1 overflow-y-auto space-y-2 pr-2">
+          <div class="flex-1 overflow-y-auto p-4 space-y-2">
             <div
               v-for="parent in displayedParents"
               :key="parent.id"
-              class="flex items-center p-3 hover:bg-gray-50 rounded-lg border border-transparent hover:border-gray-200 transition-all cursor-pointer"
               @click="toggleSelection(parent)"
+              :class="['group flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all',
+                       isParentSelected(parent.id) ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white border-transparent hover:border-gray-200']"
             >
-              <input
-                type="checkbox"
-                :checked="isParentSelected(parent.id)"
-                class="h-4 w-4 text-primary-600 rounded focus:ring-primary-500 border-gray-300"
-              />
-              <div class="ml-3 flex-1 min-w-0">
-                <div class="text-sm font-medium text-gray-900 truncate">{{ parent.firstname }} {{ parent.lastname }}</div>
-                <div class="text-xs text-gray-500 truncate">{{ parent.phoneNumber }}</div>
-                <div v-if="parent.provinceId || parent.districtId" class="text-[10px] text-gray-400 truncate">
-                  {{ parent.provinceId }} {{ parent.districtId ? '• ' + parent.districtId : '' }}
-                </div>
+              <div :class="['w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all mr-4',
+                            isParentSelected(parent.id) ? 'bg-blue-600 border-blue-600' : 'border-gray-300']">
+                <CheckIcon v-if="isParentSelected(parent.id)" class="w-3.5 h-3.5 text-white stroke-[3px]" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-bold text-gray-900 truncate">{{ parent.firstname }} {{ parent.lastname }}</div>
+                <div class="text-xs text-gray-500 font-medium">{{ parent.phoneNumber }}</div>
+              </div>
+              <div class="text-[10px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                {{ parent.city || 'Zimbabwe' }}
               </div>
             </div>
 
-            <!-- Empty State for List -->
-            <div v-if="displayedParents.length === 0" class="text-center py-12">
-              <UserGroupIcon class="mx-auto h-10 w-10 text-gray-300" />
-              <p class="mt-2 text-sm text-gray-500">No parents found matching filters</p>
+            <div v-if="displayedParents.length === 0" class="text-center py-20">
+              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserGroupIcon class="h-8 w-8 text-gray-400" />
+              </div>
+              <p class="text-gray-500 font-medium">No parents found</p>
             </div>
-          </div>
-
-          <div class="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500 flex justify-between">
-            <span>Showing {{ displayedParents.length }} parents</span>
-            <span>{{ selectedRecipients.length }} selected</span>
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Message Composition -->
-      <div class="lg:col-span-1 space-y-6">
-        <!-- Message Composition -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Compose Message</h3>
-          
-          <!-- Message Template Quick Select -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Quick Templates</label>
-            <div class="grid grid-cols-2 gap-3">
-              <button
-                v-for="template in messageTemplates"
-                :key="template.id"
-                @click="useTemplate(template)"
-                class="p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
-              >
-                <div class="font-medium text-gray-900">{{ template.title }}</div>
-                <div class="text-xs text-gray-500 truncate">{{ template.message }}</div>
-              </button>
-            </div>
+      <!-- Right: Message Box -->
+      <div class="lg:col-span-7">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 h-full flex flex-col">
+          <div class="mb-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Compose Your Message</h3>
+            <p class="text-sm text-gray-500">Keep it clear and professional. Character limits apply for standard SMS.</p>
           </div>
 
-          <!-- Message Input -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Your Message <span class="text-red-500">*</span>
-            </label>
-            <textarea
-              v-model="messageContent"
-              rows="6"
-              maxlength="160"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-sans"
-              placeholder="Type your message here (160 characters max)..."
-            ></textarea>
-            <div class="flex justify-between mt-2">
-              <div class="text-sm text-gray-500">
-                {{ messageContent.length }}/160 characters
+          <div class="flex-1">
+            <label class="block text-sm font-bold text-gray-700 mb-3 ml-1 uppercase tracking-wider">SMS Content</label>
+            <div class="relative">
+              <textarea
+                v-model="messageContent"
+                rows="10"
+                class="w-full px-6 py-5 bg-gray-50 border-2 border-gray-100 rounded-3xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all text-lg leading-relaxed resize-none"
+                placeholder="Type your message here..."
+                maxlength="160"
+              ></textarea>
+              <div class="absolute bottom-4 right-6 text-sm font-bold" :class="messageContent.length > 140 ? 'text-orange-500' : 'text-gray-400'">
+                {{ messageContent.length }} / 160
               </div>
-              <div class="text-sm text-gray-500">
-                {{ messageSegments }} SMS segment{{ messageSegments !== 1 ? 's' : '' }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Message Preview -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Message Preview</label>
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <div class="text-sm text-gray-600 mb-2">SMS Preview:</div>
-              <div class="bg-white p-3 rounded border border-gray-300 font-sans text-gray-800">
-                {{ messageContent || 'Your message will appear here...' }}
-              </div>
-              <div class="text-xs text-gray-500 mt-2">
-                From: Child VaxNet • This message will be sent to {{ selectedRecipients.length }} recipient{{ selectedRecipients.length !== 1 ? 's' : '' }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Scheduling -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Schedule Message</label>
-            <div class="flex items-center space-x-4">
-              <label class="flex items-center">
-                <input
-                  v-model="scheduleType"
-                  type="radio"
-                  value="now"
-                  class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
-                />
-                <span class="ml-2 text-gray-700">Send now</span>
-              </label>
-              <label class="flex items-center">
-                <input
-                  v-model="scheduleType"
-                  type="radio"
-                  value="scheduled"
-                  class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
-                />
-                <span class="ml-2 text-gray-700">Schedule for later</span>
-              </label>
             </div>
             
-            <div v-if="scheduleType === 'scheduled'" class="mt-4 grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                <input
-                  v-model="scheduledDate"
-                  type="date"
-                  :min="minDate"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+            <div class="mt-8 p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl text-white shadow-xl relative overflow-hidden">
+              <div class="absolute top-0 right-0 p-8 opacity-10">
+                <ChatBubbleBottomCenterTextIcon class="w-24 h-24" />
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Time</label>
-                <select
-                  v-model="scheduledTime"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  <option value="09:00">09:00 AM</option>
-                  <option value="10:00">10:00 AM</option>
-                  <option value="11:00">11:00 AM</option>
-                  <option value="12:00">12:00 PM</option>
-                  <option value="14:00">02:00 PM</option>
-                  <option value="15:00">03:00 PM</option>
-                  <option value="16:00">04:00 PM</option>
-                </select>
+              <div class="relative z-10">
+                <div class="text-xs font-bold text-blue-400 uppercase tracking-[0.2em] mb-4">Real-time Preview</div>
+                <div class="text-lg font-medium leading-relaxed opacity-90 italic">
+                  "{{ messageContent || 'Your message will appear here...' }}"
+                </div>
+                <div class="mt-6 flex items-center gap-6 border-t border-white/10 pt-6">
+                  <div class="text-xs">
+                    <span class="opacity-50 block uppercase tracking-widest mb-1">Recipients</span>
+                    <span class="font-bold text-sm">{{ selectedRecipients.length > 0 ? selectedRecipients.length : 'Simulation Default' }}</span>
+                  </div>
+                  <div class="text-xs">
+                    <span class="opacity-50 block uppercase tracking-widest mb-1">Segments</span>
+                    <span class="font-bold text-sm">1 SMS</span>
+                  </div>
+                  <div class="ml-auto text-xs bg-white/10 px-3 py-1.5 rounded-full">
+                    {{ selectedRecipients.length > 0 ? 'Estimated Cost: ' : 'Simulation Mode: ' }}
+                    <span class="text-blue-300 font-bold">{{ selectedRecipients.length > 0 ? '$' + (selectedRecipients.length * 0.05).toFixed(2) : 'FREE (Testing)' }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Send Button -->
-          <div class="pt-6 border-t border-gray-200">
+          <div class="mt-8 pt-8 border-t border-gray-100 flex gap-4">
+            <button
+              @click="clearAll"
+              class="px-8 py-4 border-2 border-gray-200 text-gray-600 rounded-2xl font-bold hover:bg-gray-50 transition-all"
+            >
+              Clear All
+            </button>
             <button
               @click="sendBroadcast"
               :disabled="!canSend"
-              class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="flex-1 bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20 py-4 flex items-center justify-center gap-2"
             >
-              <span v-if="!isSending" class="flex items-center justify-center">
-                <PaperAirplaneIcon class="w-5 h-5 mr-2" />
-                {{ scheduleType === 'now' ? 'Send Broadcast Now' : 'Schedule Broadcast' }}
-              </span>
-              <span v-else class="flex items-center justify-center">
-                <svg class="animate-spin h-5 w-5 mr-2 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Sending...
-              </span>
+              <PaperAirplaneIcon v-if="!isSending" class="w-6 h-6" />
+              <svg v-else class="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isSending ? 'Sending Broadcast...' : 'Initiate Broadcast' }}
             </button>
-            <p class="text-xs text-gray-500 mt-2 text-center">
-              Cost estimate: ${{ costEstimate }} • {{ selectedRecipients.length }} recipients • {{ messageSegments }} segment{{ messageSegments !== 1 ? 's' : '' }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Message History -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-semibold text-gray-900">Message History</h3>
-            <div class="flex space-x-2">
-              <select
-                v-model="historyFilter"
-                class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="all">All Messages</option>
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
-            <div
-              v-for="message in filteredHistory"
-              :key="message.id"
-              class="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
-            >
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <div class="flex items-center">
-                    <span class="font-medium text-gray-900">{{ message.title }}</span>
-                    <span :class="[
-                      'ml-2 px-2 py-1 text-xs rounded-full',
-                      message.status === 'sent' ? 'bg-green-100 text-green-800' :
-                      message.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    ]">
-                      {{ message.status }}
-                    </span>
-                  </div>
-                  <div class="text-sm text-gray-500 mt-1">
-                    {{ formatDate(message.timestamp) }} • {{ message.recipients }} recipients
-                  </div>
-                </div>
-                <button
-                  @click="resendMessage(message)"
-                  class="text-primary-600 hover:text-primary-800 text-sm font-medium"
-                >
-                  Resend
-                </button>
-              </div>
-              <div class="text-sm text-gray-700 bg-gray-50 p-3 rounded mt-2">
-                {{ message.content }}
-              </div>
-                <div class="text-xs text-gray-500">
-                  Cost: ${{ message.cost.toFixed(2) }}
-                </div>
-            </div>
-          </div>
-
-          <!-- Empty State -->
-          <div v-if="filteredHistory.length === 0" class="text-center py-12">
-            <ChatBubbleLeftRightIcon class="mx-auto h-12 w-12 text-gray-400" />
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No messages sent yet</h3>
-            <p class="mt-1 text-sm text-gray-500">Your broadcast history will appear here</p>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Success Modal -->
-    <div v-if="showSuccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircleIcon class="w-8 h-8 text-green-600" />
+    <div v-if="showSuccessModal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-[2rem] shadow-2xl max-w-md w-full p-10 text-center animate-in zoom-in duration-300">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+          <CheckBadgeIcon class="w-10 h-10 text-green-600" />
         </div>
-        
-        <h3 class="text-2xl font-bold text-gray-900 mb-4">Broadcast Sent!</h3>
-        
-        <p class="text-gray-600 mb-6">
-          Your message has been successfully sent to {{ selectedRecipients.length }} recipients.
-        </p>
-        
-        <div class="bg-blue-50 p-4 rounded-lg mb-6 text-left">
-          <div class="text-sm text-gray-700 space-y-2">
-            <div class="flex justify-between">
-              <span>Recipients:</span>
-              <span class="font-medium">{{ selectedRecipients.length }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Message segments:</span>
-              <span class="font-medium">{{ messageSegments }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Estimated cost:</span>
-              <span class="font-medium">${{ costEstimate }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Delivery time:</span>
-              <span class="font-medium">{{ scheduleType === 'now' ? 'Immediate' : scheduledDate + ' ' + scheduledTime }}</span>
-            </div>
-          </div>
-        </div>
-        
+        <h3 class="text-3xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+        <p class="text-gray-500 mb-8">Successfully broadcasted to {{ lastSendCount }} recipients across Zimbabwe.</p>
         <button
           @click="showSuccessModal = false"
-          class="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700"
+          class="w-full bg-gray-900 text-white py-5 rounded-2xl font-bold text-lg hover:bg-black transition-all shadow-xl"
         >
-          Done
+          Back to Dashboard
         </button>
       </div>
     </div>
@@ -446,57 +166,38 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   UserGroupIcon,
-  CheckCircleIcon,
-  ChatBubbleLeftRightIcon,
-  CurrencyDollarIcon,
+  MagnifyingGlassIcon,
   PaperAirplaneIcon,
-  XMarkIcon,
-  MagnifyingGlassIcon
+  CheckIcon,
+  CheckBadgeIcon,
+  ChatBubbleBottomCenterTextIcon
 } from '@heroicons/vue/24/outline'
+import { useToast } from '~/composables/useToast'
 
-// Recipients data
+const { success: notifySuccess } = useToast()
 const recipients = ref<any[]>([])
-
-// Message templates
-const messageTemplates = ref([
-  { id: 't1', title: 'Vaccination Reminder', message: 'Reminder: Your child is due for vaccination this week. Please visit your nearest health facility.' },
-  { id: 't2', title: 'Appointment Confirmation', message: 'Your vaccination appointment is confirmed for [DATE] at [TIME]. Please bring your child\'s immunization card.' },
-  { id: 't3', title: 'Campaign Announcement', message: 'Vaccination campaign this Saturday at [FACILITY]. Free vaccines for all children under 5 years.' },
-  { id: 't4', title: 'Follow-up Required', message: 'Important: Your child missed a scheduled vaccination. Please visit the health facility as soon as possible.' }
-])
-
-// Message history
-const messageHistory = ref<any[]>([])
-
-// Categories from DB
-const availableCategories = ref({
-    provinces: [] as string[],
-    districts: [] as string[],
-    towns: [] as string[],
-    cities: [] as string[]
-})
-
-// Search and Filtered data
+const selectedRecipients = ref<any[]>([])
 const parentSearchQuery = ref('')
-
-// Display parents based on local filters
+const messageContent = ref('')
+const isSending = ref(false)
+const showSuccessModal = ref(false)
+const lastSendCount = ref(0)
+/* ... existing helpers ... */
 const displayedParents = computed(() => {
   return recipients.value.filter(p => {
-    const matchesSearch = !parentSearchQuery.value || 
-      (p.firstname && p.firstname.toLowerCase().includes(parentSearchQuery.value.toLowerCase())) ||
-      (p.lastname && p.lastname.toLowerCase().includes(parentSearchQuery.value.toLowerCase())) ||
-      (p.phoneNumber && p.phoneNumber.includes(parentSearchQuery.value))
-    
-    const matchesProvince = !selectedProvince.value || p.provinceId === selectedProvince.value
-    const matchesDistrict = !selectedDistrict.value || p.districtId === selectedDistrict.value
-    const matchesTown = !selectedTown.value || p.town === selectedTown.value
-    const matchesCity = !selectedCity.value || p.city === selectedCity.value
-    
-    return matchesSearch && matchesProvince && matchesDistrict && matchesTown && matchesCity
+    const q = parentSearchQuery.value.toLowerCase()
+    return !q || 
+      `${p.firstname} ${p.lastname}`.toLowerCase().includes(q) ||
+      (p.phoneNumber && p.phoneNumber.includes(q))
   })
 })
 
-const isParentSelected = (id: string) => {
+const allInFilteredSelected = computed(() => {
+  if (displayedParents.value.length === 0) return false
+  return displayedParents.value.every(p => isParentSelected(p.id))
+})
+
+const isParentSelected = (id: string | number) => {
   return selectedRecipients.value.some(r => r.id === id)
 }
 
@@ -509,204 +210,66 @@ const toggleSelection = (parent: any) => {
   }
 }
 
-const selectAllFiltered = () => {
-  displayedParents.value.forEach(p => {
-    if (!isParentSelected(p.id)) {
-      selectedRecipients.value.push(p)
-    }
-  })
+const toggleSelectAll = () => {
+  if (allInFilteredSelected.value) {
+    const displayedIds = new Set(displayedParents.value.map(p => p.id))
+    selectedRecipients.value = selectedRecipients.value.filter(r => !displayedIds.has(r.id))
+  } else {
+    displayedParents.value.forEach(p => {
+      if (!isParentSelected(p.id)) selectedRecipients.value.push(p)
+    })
+  }
 }
-
-const deselectAllFiltered = () => {
-  const idsToRemove = displayedParents.value.map(p => p.id)
-  selectedRecipients.value = selectedRecipients.value.filter(r => !idsToRemove.includes(r.id))
-}
-
-// Form state
-const selectedProvince = ref('')
-const selectedDistrict = ref('')
-const selectedTown = ref('')
-const selectedCity = ref('')
-const selectedRecipients = ref<any[]>([])
-const messageContent = ref('')
-const scheduleType = ref('now')
-const scheduledDate = ref('')
-const scheduledTime = ref('10:00')
-const historyFilter = ref('all')
-const isSending = ref(false)
-const showSuccessModal = ref(false)
-
-const minDate = computed(() => {
-  const today = new Date()
-  return today.toISOString().split('T')[0]
-})
-
-// Computed properties
-const filteredHistory = computed(() => {
-  const now = new Date()
-  const filter = historyFilter.value
-  if (filter === 'all') return messageHistory.value
-  const filtered = messageHistory.value.filter(msg => {
-    const msgDate = new Date(msg.timestamp)
-    if (filter === 'today') return msgDate.toDateString() === now.toDateString()
-    if (filter === 'week') {
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-      return msgDate >= weekAgo
-    }
-    if (filter === 'month') {
-      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-      return msgDate >= monthAgo
-    }
-    return true
-  })
-  return filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-})
-
-const totalRecipients = computed(() => recipients.value.length)
-
-const messageSegments = computed(() => {
-  if (!messageContent.value) return 0
-  return Math.ceil(messageContent.value.length / 160)
-})
-
-const costEstimate = computed(() => {
-  return (selectedRecipients.value.length * messageSegments.value * 0.01).toFixed(2)
-})
 
 const canSend = computed(() => {
   return messageContent.value.trim().length > 0 && 
-         selectedRecipients.value.length > 0 &&
          !isSending.value
 })
 
-const fetchCategories = () => {
-  // Deriving categories locally from the parents list
-  const cats = {
-    provinces: new Set<string>(),
-    districts: new Set<string>(),
-    towns: new Set<string>(),
-    cities: new Set<string>()
-  }
-
-  recipients.value.forEach(p => {
-    if (p.provinceId) cats.provinces.add(p.provinceId)
-    if (p.districtId) cats.districts.add(p.districtId)
-    if (p.town) cats.towns.add(p.town)
-    if (p.city) cats.cities.add(p.city)
-  })
-
-  availableCategories.value = {
-    provinces: Array.from(cats.provinces).sort(),
-    districts: Array.from(cats.districts).sort(),
-    towns: Array.from(cats.towns).sort(),
-    cities: Array.from(cats.cities).sort()
-  }
-}
-
 const fetchRecipients = async () => {
-    try {
-        // Fetch ALL parents from standard auth endpoint
-        const response = await fetch('http://localhost:8080/api/v1/auth/get-all-users-by-/PARENT')
-        recipients.value = await response.json()
-        fetchCategories()
-    } catch (e) {
-        console.error('Failed to fetch recipients', e)
-    }
-}
-
-// Methods
-const handleFilterChange = () => {
-    // Local computed property 'displayedParents' handles this
-}
-
-const removeRecipient = (id: string) => {
-  const index = selectedRecipients.value.findIndex(r => r.id === id)
-  if (index > -1) {
-    selectedRecipients.value.splice(index, 1)
+  try {
+    const response = await fetch('http://localhost:8080/api/v1/auth/get-all-users-by-/PARENT')
+    const data = await response.json()
+    recipients.value = Array.isArray(data) ? data : []
+  } catch (e) {
+    console.error('Failed to fetch parents', e)
   }
-}
-
-const clearAllRecipients = () => {
-  selectedRecipients.value = []
-  selectedProvince.value = ''
-  selectedDistrict.value = ''
-  selectedTown.value = ''
-  selectedCity.value = ''
-}
-
-const useTemplate = (template: any) => {
-  messageContent.value = template.message
 }
 
 const sendBroadcast = async () => {
-  if (selectedRecipients.value.length === 0 || !messageContent.value.trim()) return
-
+  if (!canSend.value) return
   isSending.value = true
   try {
     const response = await fetch('http://localhost:8080/api/broadcasting/send', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        phones: selectedRecipients.value.map(r => r.phoneNumber).filter(p => p != null),
+        phones: selectedRecipients.value.map(r => r.phoneNumber).filter(Boolean),
         message: messageContent.value
       })
     })
 
     if (response.ok) {
-      // Add to local history
-      messageHistory.value.unshift({
-        id: Date.now().toString(),
-        timestamp: new Date().toISOString(),
-        recipients: selectedRecipients.value.length,
-        content: messageContent.value,
-        status: 'Delivered',
-        cost: parseFloat(costEstimate.value)
-      })
-
-      showSuccessModal.value = true
+      lastSendCount.value = selectedRecipients.value.length
+      notifySuccess(`Broadcast successfully initiated to ${lastSendCount.value} parents.`)
       messageContent.value = ''
       selectedRecipients.value = []
-      selectedProvince.value = ''
-      selectedDistrict.value = ''
-      selectedTown.value = ''
-      selectedCity.value = ''
     }
   } catch (e) {
     console.error('Failed to send broadcast', e)
-    alert('Failed to send broadcast. Please check backend connection.')
+    alert('Communication error. Please check your backend connection.')
   } finally {
     isSending.value = false
   }
 }
 
-const resendMessage = (message: any) => {
-  if (confirm('Resend this message to the same recipients?')) {
-    messageContent.value = message.content
-  }
+const clearAll = () => {
+  selectedRecipients.value = []
+  messageContent.value = ''
 }
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-const loadSampleData = () => {
-  messageContent.value = 'Important: Free vaccination campaign this Saturday at local health facilities from 8AM to 4PM. Bring your child\'s immunization card.'
-}
-
-// Initialize
-onMounted(() => {
-  scheduledDate.value = minDate.value
-  fetchCategories()
-  fetchRecipients()
+onMounted(async () => {
+  await fetchRecipients()
 })
 </script>
 
