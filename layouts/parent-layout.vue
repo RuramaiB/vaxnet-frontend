@@ -1,0 +1,16 @@
+<template>
+  <div class="flex h-screen bg-gray-50">
+    <ParentSidebar />
+    <div class="flex flex-col flex-1 overflow-hidden">
+      <Navbar />
+      <main class="flex-1 overflow-y-auto p-6">
+        <slot />
+      </main>
+    </div>
+    <!-- Global toast notifications -->
+    <ToastContainer />
+  </div>
+</template>
+
+<script setup lang="ts">
+</script>
